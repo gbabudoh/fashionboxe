@@ -1,36 +1,159 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fashionboxe
 
-## Getting Started
+A modern live-streaming fashion commerce platform that connects brands with customers through real-time virtual showrooms and personal shopping experiences.
 
-First, run the development server:
+## Features
 
+- **Live Streaming Showrooms**: Real-time fashion shows with direct-from-stage ordering
+- **Virtual Personal Shoppers**: One-on-one video consultations via Jitsi
+- **Product Management**: Brands can manage inventory and showcase products
+- **Secure Payments**: Stripe integration for seamless transactions
+- **Image Management**: MinIO-based image storage and optimization
+- **Real-time Chat**: Live chat during streaming events
+- **Multi-brand Support**: Support for multiple fashion brands and concessions
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 19, Tailwind CSS, Framer Motion
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Database**: PostgreSQL
+- **Storage**: MinIO (S3-compatible)
+- **Video**: Jitsi Meet for video conferencing, Owncast for streaming
+- **Payments**: Stripe
+- **Communication**: Mattermost integration
+
+## Prerequisites
+
+- Node.js 18+
+- PostgreSQL database
+- MinIO instance
+- Stripe account
+- Jitsi server (optional, can use demo)
+
+## Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/gbabudoh/fashionboxe.git
+cd fashionboxe
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Update `.env` with your configuration:
+```
+DATABASE_URL="postgresql://user:password@host:5432/fashionboxe"
+MINIO_ENDPOINT="your-minio-endpoint"
+MINIO_PORT=9000
+MINIO_ACCESS_KEY="your-access-key"
+MINIO_SECRET_KEY="your-secret-key"
+STRIPE_SECRET_KEY="your-stripe-key"
+JITSI_DOMAIN="your-jitsi-domain"
+```
 
-## Learn More
+4. Set up the database:
+```bash
+npx prisma migrate deploy
+npx prisma generate
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Run the development server:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+fashionboxe/
+├── app/
+│   ├── api/              # API routes
+│   ├── brand/            # Brand storefront pages
+│   ├── dashboard/        # Brand dashboard
+│   ├── showrooms/        # Showroom directory
+│   └── page.tsx          # Home page
+├── components/           # Reusable React components
+├── lib/                  # Utilities and services
+├── prisma/               # Database schema and migrations
+└── public/               # Static assets
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key Pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/` - Home page with featured brands
+- `/showrooms` - Browse all active showrooms
+- `/brand/[slug]` - Individual brand storefront with live stream
+- `/dashboard/brand` - Brand management dashboard
+- `/live` - Live streaming interface
+
+## API Endpoints
+
+- `GET /api/brands` - List all brands
+- `POST /api/stripe/connect` - Stripe account setup
+- `POST /api/products/[productId]/images` - Upload product images
+- `POST /api/interactions/shopper` - Request personal shopper
+- `POST /api/checkout` - Create checkout session
+
+## Development
+
+### Database Migrations
+
+Create a new migration:
+```bash
+npx prisma migrate dev --name migration_name
+```
+
+### Generate Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `MINIO_ENDPOINT` | MinIO server endpoint |
+| `MINIO_PORT` | MinIO server port |
+| `MINIO_ACCESS_KEY` | MinIO access key |
+| `MINIO_SECRET_KEY` | MinIO secret key |
+| `STRIPE_SECRET_KEY` | Stripe API secret key |
+| `JITSI_DOMAIN` | Jitsi server domain |
+| `OWNCAST_ACCESS_TOKEN` | Owncast streaming token |
+
+## Contributing
+
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Push to the branch (`git push origin feature/amazing-feature`)
+4. Open a Pull Request
+
+## License
+
+This project is proprietary and confidential.
+
+## Support
+
+For support, email support@fashionboxe.com or open an issue on GitHub.
+
+---
+
+**Fashionboxe** - Disrupting the Runway. 2026
