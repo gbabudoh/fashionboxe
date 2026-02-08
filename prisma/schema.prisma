@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  country     String?  @default("Global")
+  logoUrl     String?
+  bannerUrl   String?
+  
+  primaryColor   String?
+  secondaryColor String?
+  accentColor    String?
+
+  streamUrl      String?
+  isLive         Boolean @default(false)
+  lastLiveAt     DateTime?
+  status         BrandStatus @default(OPEN)
+  
+  // Timed Closures
+  openingTime    String?  // HH:mm format
+  closingTime    String?  // HH:mm format
+  timezone       String?  @default("UTC")
+  
+  // Notifications
+  mattermostWebhookUrl String?
+  
+  jitsiRoomId    String?
+  stripeAccountId String?
+
+  products       Product[]
+  users          User[]     @relation("BrandEmployees")
+  orders         Order[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+enum BrandStatus {
+  OPEN
+  CLOSED
+  LIVE_STREAMING
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  
+  images      String[]
+  
+  brandId     String
+  brand       Brand    @relation(fields: [brandId], references: [id])
+  
+  stock       Int      @default(0)
+  category    String?
+  
+  // Immersive Retail Data
+  hotspots    Json?    // Stores { x: number, y: number } coordinates
+  
+  orderItems  OrderItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([brandId])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  customerEmail   String
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  currency        String      @default("USD")
+  status          OrderStatus @default(PENDING)
+  stripeSessionId String?     @unique
+  
+  brandId         String
+  brand           Brand       @relation(fields: [brandId], references: [id])
+  
+  items           OrderItem[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([brandId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2) // Snapshot price at time of order
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  country   String?  @default("Global")
+  role      Role     @default(CUSTOMER)
+  
+  brandId   String?
+  brand     Brand?   @relation("BrandEmployees", fields: [brandId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  BRAND_MANAGER
+  PERSONAL_SHOPPER
+  CUSTOMER
+}
