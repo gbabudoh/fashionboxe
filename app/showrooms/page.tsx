@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, Radio, Users, ArrowRight, Grid, List, Sparkles } from 'lucide-react';
+import { Search, Radio, Users, ArrowRight, Grid, List, Sparkles, SortAsc, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/Header';
+import CountrySelector from '@/components/CountrySelector';
 
 interface Brand {
   id: string;
@@ -24,18 +25,41 @@ export default function ShowroomsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [selectedCountry, setSelectedCountry] = useState('Global');
+  const [sortBy, setSortBy] = useState<'latest' | 'alphabetical' | 'status' | 'recommended'>('recommended');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [hasFetched, setHasFetched] = useState(false);
 
+  const [isSearching, setIsSearching] = useState(false);
+
+  // 2026 UX: Debounced Search to prevent API spam while typing
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   useEffect(() => {
     async function fetchBrands() {
+      setIsSearching(true);
       try {
-        const res = await fetch('/api/brands');
+        const params = new URLSearchParams();
+        if (debouncedSearch) params.set('search', debouncedSearch);
+        if (category !== 'All') params.set('category', category);
+        if (selectedCountry !== 'Global') params.set('country', selectedCountry);
+
+        const res = await fetch(`/api/brands?${params.toString()}`);
         if (!res.ok) throw new Error('API unstable');
         const data = await res.json();
         
-        // 2026 UX: Use real data first, fallback to mock only if DB is empty
-        const finalBrands = data && data.length > 0 ? data : [
+        // 2026 UX: Use real data first, fallback to mock only if DB is empty and no filters
+        const isFiltered = debouncedSearch || category !== 'All' || selectedCountry !== 'Global';
+        
+        const mockFallback = [
           {
             id: '1',
             name: 'Vanguard Elite',
@@ -67,34 +91,50 @@ export default function ShowroomsPage() {
             image: "https://images.pexels.com/photos/322207/pexels-photo-322207.jpeg?auto=compress&cs=tinysrgb&w=800"
           }
         ];
-        setBrands(finalBrands);
+
+        // If searching but nothing found, don't show mock fallback
+        if (data && data.length > 0) {
+          setBrands(data);
+        } else if (!isFiltered) {
+          setBrands(mockFallback);
+        } else {
+          setBrands([]);
+        }
       } catch (error) {
         console.error('Fetch error:', error);
-        // Ensure UI doesn't break if API fails
-        setBrands([
-          {
-            id: '1',
-            name: 'Vanguard Elite',
-            slug: 'vanguard-elite',
-            country: 'France',
-            status: 'LIVE_STREAMING',
-            isLive: true,
-            category: 'Apparel',
-            image: "https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=800"
-          }
-        ]);
+        setBrands([]);
       } finally {
         setHasFetched(true);
+        setIsSearching(false);
       }
     }
     fetchBrands();
-  }, []);
+  }, [debouncedSearch, category, selectedCountry]);
 
-  const filteredBrands = brands.filter(b => {
-    const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = category === 'All' || b.category === category;
-    return matchesSearch && matchesCategory;
-  });
+  // Client-side filtering is now largely handled by the server, 
+  // but we still apply sorting and local category logic if mocked
+  const filteredBrands = [...brands]
+    .sort((a, b) => {
+      if (sortBy === 'recommended') {
+        const getRecPriority = (s: string) => s === 'LIVE_STREAMING' ? 0 : s === 'OPEN' ? 1 : 2;
+        // Prioritize Live then alphabetically
+        if (getRecPriority(a.status) !== getRecPriority(b.status)) {
+          return getRecPriority(a.status) - getRecPriority(b.status);
+        }
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === 'alphabetical') {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === 'status') {
+        const getPriority = (s: string) => s === 'LIVE_STREAMING' ? 0 : s === 'OPEN' ? 1 : 2;
+        return getPriority(a.status) - getPriority(b.status);
+      }
+      // Latest is default (assumes data is already largely sorted by activity or ID)
+      return 0;
+    });
+
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans">
@@ -119,19 +159,58 @@ export default function ShowroomsPage() {
         </div>
 
         {/* Filter HUD Overlay */}
-        <div className="relative z-20 flex flex-col md:flex-row gap-6 mb-12 p-6 bg-white/5 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-2xl">
-          <div className="flex-1 relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-focus-within:text-action transition-colors" />
-            <input 
-              type="text"
-              placeholder="Search for a showroom..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-6 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-action/40 transition-all"
-            />
-          </div>
+        <div className="relative z-20 flex flex-col md:flex-row items-center gap-6 mb-12 p-6 bg-white/5 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-2xl overflow-hidden">
+          
+          {/* Expanding Search HUD */}
+          <motion.div 
+            initial={false}
+            animate={{ width: isSearchOpen ? '280px' : '64px' }}
+            className="relative flex items-center h-16 bg-black/40 border border-white/5 rounded-2xl overflow-hidden shadow-inner group"
+          >
+            <button 
+              onClick={() => {
+                setIsSearchOpen(!isSearchOpen);
+                if (!isSearchOpen) setTimeout(() => searchInputRef.current?.focus(), 100);
+              }}
+              className={`absolute left-0 top-0 bottom-0 w-16 flex items-center justify-center transition-colors z-20 cursor-pointer ${isSearchOpen ? 'text-action' : 'text-white/20 hover:text-white'}`}
+            >
+              <Search size={20} />
+            </button>
 
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+            <AnimatePresence>
+              {isSearchOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="flex-1 pl-16 pr-10"
+                >
+                  <input 
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search showrooms..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className={`w-full bg-transparent border-none py-4 text-sm text-white placeholder:text-white/10 focus:outline-none ${isSearching ? 'animate-pulse' : ''}`}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {isSearchOpen && search && (
+              <button 
+                onClick={() => {
+                  setSearch('');
+                  searchInputRef.current?.focus();
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-full text-white/30 hover:text-white transition-all cursor-pointer z-20"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </motion.div>
+
+          <div className="flex items-center gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide flex-1">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
@@ -145,6 +224,38 @@ export default function ShowroomsPage() {
                 {cat}
               </button>
             ))}
+          </div>
+
+          <div className="h-full w-px bg-white/10 hidden lg:block" />
+
+          <div className="flex items-center gap-3">
+             <CountrySelector 
+               value={selectedCountry}
+               onChange={setSelectedCountry}
+               variant="modal"
+               className="min-w-[180px]"
+             />
+          </div>
+
+          <div className="h-full w-px bg-white/10 hidden md:block" />
+
+          <div className="flex items-center gap-4 bg-black/20 rounded-2xl p-1 border border-white/5">
+             <div className="px-3">
+               <SortAsc size={16} className="text-white/20" />
+             </div>
+             {(['recommended', 'status', 'alphabetical', 'latest'] as const).map((id) => (
+               <button
+                 key={id}
+                 onClick={() => setSortBy(id)}
+                 className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                   sortBy === id 
+                     ? 'bg-white/10 text-white shadow-lg' 
+                     : 'text-white/20 hover:text-white/40'
+                 }`}
+               >
+                 {id === 'recommended' ? 'Best' : id === 'status' ? 'Priority' : id === 'alphabetical' ? 'A-Z' : 'Latest'}
+               </button>
+             ))}
           </div>
 
           <div className="h-full w-px bg-white/10 hidden md:block" />
@@ -189,13 +300,19 @@ export default function ShowroomsPage() {
                   {/* Status Badges HUD */}
                   <div className="absolute top-8 left-8 flex gap-3">
                     {brand.isLive ? (
-                      <div className="flex items-center gap-2 rounded-full bg-action px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-background animate-pulse">
+                      <div className="flex items-center gap-2 rounded-full bg-action px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-background animate-pulse shadow-[0_0_20px_rgba(0,240,255,0.4)]">
                         <Radio size={12} />
                         Live Showroom
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-white/60">
                          Showroom Open
+                      </div>
+                    )}
+                    {(sortBy === 'recommended' && idx < 2) && (
+                      <div className="flex items-center gap-2 rounded-full bg-accent/90 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-background shadow-[0_0_20px_rgba(212,175,55,0.4)]">
+                        <Sparkles size={12} />
+                        Top Pick
                       </div>
                     )}
                   </div>

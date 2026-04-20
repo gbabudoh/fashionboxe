@@ -32,7 +32,7 @@ export default function BrandStorefrontClient({ brandName, brandId, jitsiRoomId 
   return (
     <button 
       onClick={handleRequestShopper}
-      className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-full bg-accent px-20 py-2.5 text-[11px] font-black uppercase tracking-[0.3em] text-background transition-all hover:scale-[1.02] hover:shadow-[0_0_50px_rgba(212,175,55,0.3)] active:scale-95 cursor-pointer min-w-[320px]"
+      className="group relative flex items-center justify-center gap-4 overflow-hidden rounded-full bg-accent px-10 py-3 text-[11px] font-black uppercase tracking-[0.3em] text-background transition-all hover:scale-[1.02] hover:shadow-[0_0_50px_rgba(212,175,55,0.3)] active:scale-95 cursor-pointer min-w-[240px] shadow-2xl"
     >
       <div className="relative z-10 flex items-center gap-3">
         <Video className="h-4 w-4" />

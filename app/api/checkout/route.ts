@@ -77,37 +77,68 @@ export async function POST(req: Request) {
       return acc + (unitAmount * quantity);
     }, 0);
     
+    // Create the Order in our database first (PENDING)
+    const order = await prisma.order.create({
+      data: {
+        customerEmail: 'pending@fashionboxe.com', // To be updated by webhook
+        totalAmount: totalAmount / 100,
+        status: 'PENDING',
+        brandId: isSingleBrand ? (firstProduct.brandId as string) : 'multi-brand', // Adjusted for multi-brand
+        items: {
+          create: products.map(p => ({
+            productId: p.id,
+            quantity: itemMap.get(p.id) || 1,
+            price: Number(p.price)
+          }))
+        }
+      }
+    });
+
     // Platform Fee: 10%
     const applicationFee = Math.round(totalAmount * 0.10);
 
     const sessionOptions: import('stripe').Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       line_items: lineItems,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/wardrobe?success=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/wardrobe?success=true&order_id=${order.id}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/wardrobe?canceled=true`,
+      metadata: {
+        orderId: order.id,
+      },
     };
 
     // If it's a single brand, we can use direct transfer_data
-    if (isSingleBrand && firstProduct.brand.stripeAccountId) {
+    if (isSingleBrand && firstProduct.brand.stripeAccountId && firstProduct.brandId !== 'demo-brand') {
       sessionOptions.payment_intent_data = {
         application_fee_amount: applicationFee,
         transfer_data: {
           destination: firstProduct.brand.stripeAccountId,
         },
+        metadata: {
+          orderId: order.id
+        }
       };
     } else {
-      // For multi-brand, we use transfer_group and will handle split transfers via webhooks/manual
-      // In a production app, we would use a more complex logic here
       sessionOptions.payment_intent_data = {
-         transfer_group: `ORDER-${Date.now()}`,
+         transfer_group: `ORDER-${order.id}`,
+         metadata: {
+          orderId: order.id
+         }
       };
     }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
 
+    // Update order with Stripe Session ID
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { stripeSessionId: session.id }
+    });
+
     // Notify all involved brands via Mattermost
     for (const brand of new Set(products.map(p => p.brand))) {
-      if (brand.mattermostWebhookUrl) {
+      // (Mattermost notification logic remains same, but using real brand IDs)
+      if (brand.id !== 'demo-brand' && brand.mattermostWebhookUrl) {
         const brandProducts = products.filter(p => p.brandId === brand.id);
         const { sendBrandAlert } = await import('@/lib/mattermost');
         await sendBrandAlert(brand.mattermostWebhookUrl, {

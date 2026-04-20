@@ -103,14 +103,14 @@ export default async function Home({
                   Experience the runway in real-time. Shop direct from the stream with the world&apos;s most exclusive brands in {region || 'the Global Mall'}.
                 </p>
                 <div className="mt-10 flex flex-wrap gap-4">
-                  <button className="group flex items-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-black text-black transition-all hover:bg-accent hover:scale-105 cursor-pointer">
+                  <Link href="/live" className="group flex items-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-black text-black transition-all hover:bg-accent hover:scale-105 cursor-pointer">
                     <Play className="h-4 w-4 fill-current" />
                     Watch Live Feed
-                  </button>
-                  <button className="group flex items-center gap-3 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-white/10 cursor-pointer">
+                  </Link>
+                  <Link href="/showrooms" className="group flex items-center gap-3 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-black text-white backdrop-blur-xl transition-all hover:bg-white/10 cursor-pointer">
                     Explore Concessions
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </HomeClient>
@@ -125,7 +125,7 @@ export default async function Home({
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Elite Showrooms</h2>
             <p className="mt-2 text-4xl font-black text-white">{region && region !== 'Global' ? `${region} Concessions` : 'The Global Mall'}</p>
           </div>
-          <button className="text-sm font-bold text-white/40 hover:text-accent transition-colors cursor-pointer">View All Brands</button>
+          <Link href="/showrooms" className="text-sm font-bold text-white/40 hover:text-accent transition-colors cursor-pointer">View All Brands</Link>
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">

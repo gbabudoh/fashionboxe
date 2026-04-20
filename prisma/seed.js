@@ -2,45 +2,41 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  const brands = [
-    {
-      name: 'Vanguard Elite',
-      slug: 'vanguard-elite',
-      country: 'France',
-      status: 'LIVE_STREAMING',
-      isLive: true,
-      description: 'High-end avant-garde apparel from the heart of Paris.',
-      streamUrl: 'https://demo.owncast.online', // Keeping for structure, but component will now fallback
-      bannerUrl: 'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=1200'
-    },
-    {
-      name: 'Aetheris Gold',
-      slug: 'aetheris-gold',
-      country: 'Italy',
-      status: 'OPEN',
-      isLive: false,
-      description: 'Exquisite timepieces and jewelry crafted in Milan.',
-      bannerUrl: 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=1200'
-    },
-    {
-      name: 'Midnight Bloom',
-      slug: 'midnight-bloom',
-      country: 'United Kingdom',
-      status: 'OPEN',
-      isLive: false,
-      description: 'Bespoke accessories and leather goods from London.',
-      bannerUrl: 'https://images.pexels.com/photos/322207/pexels-photo-322207.jpeg?auto=compress&cs=tinysrgb&w=1200'
-    }
-  ];
+  console.log('--- SEEDING FASHIONBOXE IDENTITY CORE ---');
 
-  for (const brand of brands) {
-    await prisma.brand.upsert({
-      where: { slug: brand.slug },
-      update: {},
-      create: brand,
-    });
-    console.log(`Upserted brand: ${brand.name}`);
-  }
+  // Create a Demo Brand
+  const brand = await prisma.brand.upsert({
+    where: { slug: 'lux-noir' },
+    update: {},
+    create: {
+      name: 'LUX NOIR',
+      slug: 'lux-noir',
+      description: 'The epitome of cinematic dark fashion.',
+      country: 'France',
+      status: 'OPEN',
+      primaryColor: '#0d0d0d',
+      accentColor: '#d4af37',
+      jitsiRoomId: 'lux-noir-private-showroom',
+    },
+  });
+
+  console.log(`Brand Created: ${brand.name}`);
+
+  // Create a Brand Manager User
+  const manager = await prisma.user.upsert({
+    where: { email: 'manager@luxnoir.com' },
+    update: {},
+    create: {
+      email: 'manager@luxnoir.com',
+      name: 'Julian Rose',
+      role: 'BRAND_MANAGER',
+      brandId: brand.id,
+      country: 'France',
+    },
+  });
+
+  console.log(`Manager Created: ${manager.name} (${manager.email})`);
+  console.log('--- SEEDING COMPLETE ---');
 }
 
 main()

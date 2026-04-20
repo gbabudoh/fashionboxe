@@ -208,8 +208,9 @@ const COUNTRIES = [
 
 const FREQUENT_COUNTRIES = [
   { code: 'US', name: 'United States', flag: '🇺🇸' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
   { code: 'FR', name: 'France', flag: '🇫🇷' },
+  { code: 'IT', name: 'Italy', flag: '🇮🇹' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
   { code: 'JP', name: 'Japan', flag: '🇯🇵' },
   { code: 'NG', name: 'Nigeria', flag: '🇳🇬' },
   { code: 'Global', name: 'Global', flag: '🌍' },

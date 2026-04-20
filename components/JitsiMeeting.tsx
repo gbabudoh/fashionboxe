@@ -10,7 +10,7 @@ interface JitsiMeetingProps {
 }
 
 const JitsiMeeting = ({ 
-  domain = 'meet.jit.si', 
+  domain = 'jitsi.feendesk.com', 
   roomName, 
   displayName,
   onClose 
@@ -33,16 +33,24 @@ const JitsiMeeting = ({
           configOverwrite: {
             startWithAudioMuted: false,
             startWithVideoMuted: false,
-            prejoinPageEnabled: false,
+            prejoinPageEnabled: true, // Specifically target the prejoin page as shown in screenshot
             disableModeratorIndicator: true,
             enableEmailInStats: false,
-            disableChat: true, // Keep focus on the video/garment
-            toolbarButtons: ['microphone', 'camera', 'hangup', 'videoquality'], 
+            disableChat: true,
+            toolbarButtons: ['microphone', 'camera', 'hangup', 'videoquality'],
+            branding: {
+              logoUrl: `${window.location.origin}/fashionboxe-text-logo.svg`,
+              link: 'https://fashionboxe.com'
+            }
           },
           interfaceConfigOverwrite: {
             SHOW_JITSI_WATERMARK: false,
             SHOW_WATERMARK_FOR_GUESTS: false,
+            SHOW_BRAND_WATERMARK: true,
+            BRAND_WATERMARK_LINK: 'https://fashionboxe.com',
+            DEFAULT_LOGO_URL: `${window.location.origin}/fashionboxe-text-logo.svg`,
             DEFAULT_REMOTE_DISPLAY_NAME: 'Fashionboxe Concierge',
+            JITSI_WATERMARK_LINK: 'https://fashionboxe.com',
           }
         });
 

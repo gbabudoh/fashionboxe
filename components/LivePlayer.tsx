@@ -146,28 +146,36 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-black">
-      {/* Layer 1: The Optimized Stream/Video Layer */}
-      {streamUrl && !streamUrl.includes('demo.owncast.online') ? (
-        <iframe
-          src={`${streamUrl}/embed/video${isMuted ? '?muted=true' : ''}`}
-          title={`${brandName} Live Stream`}
-          className="absolute inset-0 w-full h-full border-0 object-cover"
-          allowFullScreen
-          allow="autoplay; encrypted-media"
-          onError={() => console.log("Stream failed, showing backup...")}
-        />
-      ) : (
-        /* 2026 UX: High-Fidelity Video Loop Fallback for Unstable Streams */
-        <video
-          src={fallbackVideoUrl || "https://player.vimeo.com/external/494441551.sd.mp4?s=49fc751a027962886f4553531b4632db2f2c8d28&profile_id=164&oauth2_token_id=57447761"}
-          autoPlay
-          loop
-          muted={isMuted}
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
+    <div className="relative h-full w-full overflow-hidden bg-black flex items-center justify-center p-5 md:p-10">
+      {/* Layer 0: Premium Frame / Cinematic Border */}
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-accent/5 via-transparent to-accent/5 pointer-events-none" />
+      
+      <div className="relative h-full w-full rounded-[40px] overflow-hidden border-2 border-white/20 shadow-[0_0_80px_rgba(0,0,0,0.9),inset_0_0_30px_rgba(255,255,255,0.05),0_0_20px_rgba(212,175,55,0.1)] bg-secondary">
+        {/* Layer 1: The Optimized Stream/Video Layer */}
+        {streamUrl && !streamUrl.includes('demo.owncast.online') ? (
+          <iframe
+            src={`${streamUrl}/embed/video${isMuted ? '?muted=true' : ''}`}
+            title={`${brandName} Live Stream`}
+            className="absolute inset-0 w-full h-full border-0 object-cover"
+            allowFullScreen
+            allow="autoplay; encrypted-media"
+            onError={() => console.log("Stream failed, showing backup...")}
+          />
+        ) : (
+          /* 2026 UX: High-Fidelity Video Loop Fallback for Unstable Streams */
+          <video
+            src={fallbackVideoUrl || "https://assets.mixkit.co/videos/preview/mixkit-fashion-model-walking-on-a-runway-41223-large.mp4"}
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-1000"
+          />
+        )}
+      </div>
+
+      {/* Layer 1.2: Cinematic Scanlines Overlay */}
+      <div className="absolute inset-5 md:inset-10 z-1 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] rounded-[40px]" />
 
       {/* Layer 1.5: Tap to Unmute Overlay */}
       <AnimatePresence>
@@ -177,7 +185,7 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsMuted(false)}
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm group"
+            className="absolute inset-5 md:inset-10 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm group rounded-[40px]"
           >
             <div className="relative h-24 w-24 flex items-center justify-center rounded-full bg-white/10 border border-white/20 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-500">
                <div className="absolute inset-0 rounded-full border border-white/40 animate-ping opacity-20" />
@@ -190,14 +198,18 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
 
       {/* Layer 2: Status Overlays (HUD) */}
       <div className="absolute left-10 top-32 z-20 flex items-center gap-4">
-        <span className="flex items-center gap-2 rounded-full bg-action px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-background shadow-2xl shadow-action/40 animate-pulse">
-          <Radio className="h-3 w-3" />
-          Live
-        </span>
-        <span className="flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-2xl px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white/90 border border-white/10">
-          <Users className="h-3 w-3" />
-          1.2K Watching
-        </span>
+        <div className="flex items-center gap-3 bg-action px-4 py-1.5 rounded-full shadow-2xl shadow-action/40 animate-pulse">
+          <Radio className="h-3.5 w-3.5 text-background" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-background">Live Feed</span>
+        </div>
+        <div className="flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-2xl px-4 py-1.5 border border-white/10">
+          <Users className="h-3.5 w-3.5 text-white/40" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90">1.2K Watching</span>
+        </div>
+        <div className="hidden lg:flex items-center gap-3 rounded-full bg-white/5 backdrop-blur-2xl px-4 py-1.5 border border-white/10 text-white/40">
+           <Camera className="h-3 w-3" />
+           <span className="text-[8px] font-black uppercase tracking-widest">CAM_0{mounted ? (Math.floor(brandName.length % 4) + 1) : '1'}</span>
+        </div>
       </div>
 
       {/* Phase 3: Real-time Activity Ticker */}
@@ -269,7 +281,7 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
       </div>
 
       {/* Shopping Bag Icon HUD */}
-      <div className="absolute right-10 top-32 z-20">
+      <div className="absolute right-10 top-28 z-20">
          <Link href="/wardrobe">
            <button 
              className="relative h-14 w-14 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-2xl border border-white/10 hover:bg-black/60 transition-all group cursor-pointer"
