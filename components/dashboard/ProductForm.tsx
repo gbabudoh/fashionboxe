@@ -107,14 +107,20 @@ const ProductForm = ({ brandId }: ProductFormProps) => {
                 <label className="text-xs font-bold uppercase tracking-widest text-white/40">Collection Category</label>
                 <div className="relative">
                   <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                  <input 
+                  <select 
                     required
-                    type="text" 
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder="e.g., Evening Wear"
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-6 text-sm text-white focus:border-accent/40 focus:outline-none placeholder:text-white/10"
-                  />
+                    className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-6 text-sm text-white focus:border-accent/40 focus:outline-none placeholder:text-white/10"
+                  >
+                    <option value="" disabled className="bg-[#0a0a0a]">Select Category</option>
+                    <option value="Apparel" className="bg-[#0a0a0a]">Apparel</option>
+                    <option value="Footwear" className="bg-[#0a0a0a]">Footwear</option>
+                    <option value="Accessories" className="bg-[#0a0a0a]">Accessories</option>
+                    <option value="Jewelry" className="bg-[#0a0a0a]">Jewelry</option>
+                    <option value="Beauty" className="bg-[#0a0a0a]">Beauty</option>
+                    <option value="Home" className="bg-[#0a0a0a]">Home</option>
+                  </select>
                 </div>
               </div>
               <div className="space-y-2">

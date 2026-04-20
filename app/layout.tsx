@@ -40,6 +40,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "react-hot-toast";
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
   children,
@@ -51,8 +52,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} antialiased selection:bg-accent selection:text-black`}
       >
-        <Toaster position="bottom-right" />
-        {children}
+        <Providers>
+          <Toaster position="bottom-right" />
+          {children}
+        </Providers>
       </body>
     </html>
   );

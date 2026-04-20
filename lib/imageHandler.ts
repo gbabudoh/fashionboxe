@@ -19,7 +19,7 @@ export function getOptimizedImageUrl(
   if (!originalUrl) return '';
 
   // If it's already an external URL and not our MinIO, return as-is
-  if (originalUrl.startsWith('http') && !originalUrl.includes(MINIO_ENDPOINT) && !originalUrl.includes('pexels.com')) {
+  if (originalUrl.startsWith('http') && !originalUrl.includes(MINIO_ENDPOINT)) {
     return originalUrl;
   }
 

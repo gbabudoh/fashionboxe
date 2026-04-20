@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import CountrySelector from './CountrySelector';
+import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, LogOut, LayoutDashboard } from 'lucide-react';
+import CountrySelector from './CountrySelector';
 import { useWardrobeStore } from '@/lib/store/useWardrobeStore';
 
 export default function Header() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const currentRegion = searchParams.get('region') || 'Global';
   const [region, setRegion] = useState(currentRegion);
@@ -24,12 +26,9 @@ export default function Header() {
 
   const handleRegionChange = (newRegion: string) => {
     setRegion(newRegion);
-    // Persist via URL to allow Server Components to react
     const params = new URLSearchParams(searchParams.toString());
     params.set('region', newRegion);
     router.push(`/?${params.toString()}`);
-    
-    // Also save to localStorage for persistence across visits
     localStorage.setItem('fb_preferred_region', newRegion);
   };
 
@@ -72,12 +71,34 @@ export default function Header() {
             onChange={handleRegionChange} 
             variant="dropdown"
           />
-          
-          <Link href="/runway">
-            <button className="rounded-full bg-accent px-6 py-2.5 text-xs font-bold text-background shadow-lg shadow-accent/20 hover:scale-105 transition-transform active:scale-95 cursor-pointer">
-              Enter the Runway
-            </button>
-          </Link>
+
+          {status === 'authenticated' ? (
+            <div className="flex items-center gap-6">
+              <Link 
+                href={session?.user?.role === 'BRAND_MANAGER' ? '/dashboard/brand' : '/consumer'} 
+                className="text-white/60 hover:text-accent flex items-center gap-2 transition-colors"
+              >
+                 <LayoutDashboard size={14} />
+                 <span>{session?.user?.role === 'BRAND_MANAGER' ? 'Dashboard' : 'Identity Core'}</span>
+              </Link>
+              <button 
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-white/40 hover:text-fuchsia flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                 <LogOut size={14} />
+                 <span>Exit</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-6">
+              <Link href="/auth/signin" className="hover:text-accent transition-colors">Sign In</Link>
+              <Link href="/auth/signup">
+                <button className="rounded-full bg-white text-black px-6 py-2.5 text-xs font-bold shadow-lg hover:bg-accent hover:scale-105 transition-all active:scale-95 cursor-pointer">
+                  Join Concession
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile Nav */}

@@ -258,7 +258,7 @@ const CountrySelector = ({ value, onChange, className, variant = 'dropdown' }: C
       >
         <span className="text-xl">{selectedCountry?.flag}</span>
         <span className="text-xs font-bold uppercase tracking-widest">
-          {selectedCountry?.name || "Global Mall"}
+          {selectedCountry?.name === 'Global' || !selectedCountry ? "COUNTRIES" : selectedCountry.name}
         </span>
         <ChevronsUpDown size={14} className="opacity-40" />
       </button>
@@ -271,17 +271,6 @@ const CountrySelector = ({ value, onChange, className, variant = 'dropdown' }: C
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             className="absolute right-0 top-full z-50 mt-4 w-[320px] overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-900/95 backdrop-blur-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)]"
           >
-            {/* Search Header */}
-            <div className="border-b border-white/5 p-4">
-              <input
-                type="text"
-                placeholder="Find your region..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-2xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-accent/40"
-                autoFocus
-              />
-            </div>
 
             <div className="max-h-[400px] overflow-y-auto p-4 scrollbar-hide">
               {!search && (

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Instagram, Twitter, Quote, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
+import CountrySelector from '@/components/CountrySelector';
 
 interface Designer {
   id: string;
@@ -63,40 +64,16 @@ const DESIGNERS: Designer[] = [
 const COUNTRIES = ['All', 'France', 'Italy', 'United Kingdom', 'USA', 'Japan'];
 
 export default function DesignersPage() {
-  const [search, setSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('All');
-  const [sortBy, setSortBy] = useState<'recommended' | 'alphabetical'>('recommended');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
-
-  // 2026 UX: Debounced Search for fluid performance
-  const [debouncedSearch, setDebouncedSearch] = useState(search);
-  const mounted = React.useRef(false);
-  
-  useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
-    }
-    
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-      setIsSearching(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [search]);
+  const [search, setSearch] = useState('');
 
   const filteredDesigners = DESIGNERS.filter(designer => {
-    const matchesSearch = !debouncedSearch || 
-      designer.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      designer.brand.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesCountry = selectedCountry === 'All' || designer.country === selectedCountry;
-    return matchesSearch && matchesCountry;
-  }).sort((a, b) => {
-    if (sortBy === 'alphabetical') return a.name.localeCompare(b.name);
-    // Recommended logic: Simulation for demo
-    return 0;
+    const matchesSearch = !search || 
+      designer.name.toLowerCase().includes(search.toLowerCase()) ||
+      designer.brand.toLowerCase().includes(search.toLowerCase()) ||
+      designer.category.toLowerCase().includes(search.toLowerCase());
+    return matchesCountry && matchesSearch;
   });
 
   return (
@@ -135,48 +112,16 @@ export default function DesignersPage() {
           </p>
         </div>
 
-        {/* Unified Discovery HUD Integration */}
-        <div className="relative z-30 flex flex-col md:flex-row items-center gap-6 mb-20 p-6 bg-white/[0.03] backdrop-blur-3xl rounded-[32px] border border-white/5 shadow-2xl overflow-hidden">
+        {/* Discovery HUD — Clean Filter Bar */}
+        <div className="relative z-30 flex flex-col md:flex-row items-center gap-6 mb-20 p-6 bg-white/[0.03] backdrop-blur-3xl rounded-[32px] border border-white/5 shadow-2xl">
           
-          {/* Expanding Search HUD */}
-          <motion.div 
-            initial={false}
-            animate={{ width: isSearchOpen ? '280px' : '64px' }}
-            className="relative flex items-center h-16 bg-black/40 border border-white/5 rounded-2xl overflow-hidden shadow-inner group"
-          >
-            <button 
-              onClick={() => {
-                setIsSearchOpen(!isSearchOpen);
-                if (!isSearchOpen) setTimeout(() => searchInputRef.current?.focus(), 100);
-              }}
-              className={`absolute left-0 top-0 bottom-0 w-16 flex items-center justify-center transition-colors z-20 cursor-pointer ${isSearchOpen ? 'text-accent' : 'text-white/20 hover:text-white'}`}
-            >
-              <ArrowRight className={`h-5 w-5 transition-transform duration-500 ${isSearchOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-              {isSearchOpen && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="flex-1 pl-16 pr-10"
-                >
-                  <input 
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search creators..."
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setIsSearching(true);
-                    }}
-                    className={`w-full bg-transparent border-none py-4 text-sm text-white placeholder:text-white/10 focus:outline-none ${isSearching ? 'animate-pulse' : ''}`}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+          {/* Countries Dropdown */}
+          <CountrySelector 
+            value={selectedCountry === 'All' ? 'Global' : selectedCountry}
+            onChange={(val) => setSelectedCountry(val === 'Global' ? 'All' : val)}
+            variant="modal"
+            className="min-w-[200px] z-50"
+          />
 
           {/* Horizontal Category Pills */}
           <div className="flex items-center gap-4 overflow-x-auto pb-4 md:pb-0 scrollbar-hide flex-1">
@@ -195,23 +140,15 @@ export default function DesignersPage() {
              ))}
           </div>
 
-          <div className="h-10 w-px bg-white/10 hidden lg:block" />
-
-          {/* Sorting Toggles */}
-          <div className="flex items-center gap-4 bg-black/20 rounded-2xl p-1 border border-white/5">
-             {(['recommended', 'alphabetical'] as const).map((id) => (
-               <button
-                 key={id}
-                 onClick={() => setSortBy(id)}
-                 className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-                   sortBy === id 
-                     ? 'bg-white/10 text-white shadow-lg' 
-                     : 'text-white/20 hover:text-white/40'
-                 }`}
-               >
-                 {id === 'recommended' ? 'Best' : 'A-Z'}
-               </button>
-             ))}
+          {/* Search Bar */}
+          <div className="flex-shrink-0 relative">
+            <input 
+              type="text"
+              placeholder="Search designers..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-[220px] bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-accent/40 transition-all"
+            />
           </div>
         </div>
 
@@ -240,7 +177,7 @@ export default function DesignersPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90 group-hover:via-black/40 transition-all duration-700" />
                 
                 {/* Top Pick Badge */}
-                {idx === 0 && sortBy === 'recommended' && (
+                {idx === 0 && (
                   <div className="absolute top-8 left-8 flex items-center gap-2 rounded-full bg-accent/90 backdrop-blur-md px-4 py-1.5 text-[9px] font-black uppercase tracking-widest text-background shadow-[0_10px_30px_rgba(212,175,55,0.3)] animate-pulse">
                     <Sparkles size={12} />
                     Top Pick
