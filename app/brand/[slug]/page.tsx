@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import { X, ShoppingBag } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
@@ -113,7 +112,7 @@ export default async function BrandStorefront({ params }: { params: Promise<{ sl
         <BrandStorefrontClient 
           brandName={brand.name} 
           brandId={brand.id}
-          jitsiRoomId={brand.jitsiRoomId || `fb-${brand.slug}`} 
+          livekitRoomId={brand.livekitRoomId || `fb-${brand.slug}`} // Refreshed LiveKit Room ID
         />
       </div>
 

@@ -16,7 +16,7 @@ interface ConcessionSettingsFormProps {
     isLive: boolean;
     primaryColor: string | null;
     accentColor: string | null;
-    jitsiRoomId: string | null;
+    livekitRoomId: string | null;
     openingTime: string | null;
     closingTime: string | null;
     mattermostWebhookUrl: string | null;
@@ -33,7 +33,7 @@ const ConcessionSettingsForm = ({ brand }: ConcessionSettingsFormProps) => {
     isLive: brand.isLive,
     primaryColor: brand.primaryColor || '#0D0D0D',
     accentColor: brand.accentColor || '#D4AF37',
-    jitsiRoomId: brand.jitsiRoomId || '',
+    livekitRoomId: brand.livekitRoomId || '',
     openingTime: brand.openingTime || '',
     closingTime: brand.closingTime || '',
     mattermostWebhookUrl: brand.mattermostWebhookUrl || '',
@@ -93,14 +93,14 @@ const ConcessionSettingsForm = ({ brand }: ConcessionSettingsFormProps) => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-white/40">Virtual Personal Shopper Room</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-white/40">LiveKit Room Name (Concierge)</label>
             <div className="relative">
               <Radio className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
               <input 
                 type="text" 
-                value={formData.jitsiRoomId}
-                onChange={(e) => setFormData(prev => ({ ...prev, jitsiRoomId: e.target.value }))}
-                placeholder="fashionboxe-your-brand"
+                value={formData.livekitRoomId}
+                onChange={(e) => setFormData(prev => ({ ...prev, livekitRoomId: e.target.value }))}
+                placeholder="fashionboxe-your-brand-concierge"
                 className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/40"
               />
             </div>

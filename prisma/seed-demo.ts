@@ -14,7 +14,7 @@ async function main() {
       description: 'Futuristic architectural fashion for the elite.',
       country: 'France',
       status: 'LIVE_STREAMING',
-      jitsiRoomId: 'vanguard-elite-showroom',
+      livekitRoomId: 'vanguard-elite-showroom',
     },
   });
 

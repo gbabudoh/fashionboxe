@@ -34,9 +34,10 @@ model Brand {
   // Notifications
   mattermostWebhookUrl String?
   
-  jitsiRoomId    String?
+  livekitRoomId    String?
   stripeAccountId String?
 
+  category       String?  @default("Apparel")
   products       Product[]
   users          User[]     @relation("BrandEmployees")
   orders         Order[]

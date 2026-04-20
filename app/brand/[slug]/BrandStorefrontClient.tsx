@@ -7,20 +7,20 @@ import { useLiveStore } from '@/lib/store/useLiveStore';
 interface BrandStorefrontClientProps {
   brandName: string;
   brandId: string;
-  jitsiRoomId: string;
+  livekitRoomId: string;
 }
 
-export default function BrandStorefrontClient({ brandName, brandId, jitsiRoomId }: BrandStorefrontClientProps) {
+export default function BrandStorefrontClient({ brandName, brandId, livekitRoomId }: BrandStorefrontClientProps) {
   const isShopperActive = useLiveStore((state) => state.isShopperActive);
   const setShopperActive = useLiveStore((state) => state.setShopperActive);
 
   const handleRequestShopper = async () => {
-    setShopperActive(true, jitsiRoomId, brandName);
+    setShopperActive(true, livekitRoomId, brandName);
     try {
       await fetch('/api/interactions/shopper', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brandId, roomId: jitsiRoomId }),
+        body: JSON.stringify({ brandId, roomId: livekitRoomId }),
       });
     } catch (error) {
       console.error('[STOREFRONT_CLIENT] Failed to trigger shopper request:', error);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Radio, Users, X, Box, Camera, Sparkles, Volume2, ShoppingBag } from 'lucide-react';
+import { Radio, Users, X, Box, Camera, Sparkles, Volume2, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useWardrobeStore } from '@/lib/store/useWardrobeStore';
 import { useLiveStore } from '@/lib/store/useLiveStore';
 import { toast } from 'react-hot-toast';
-import JitsiMeeting from '@/components/JitsiMeeting';
+import LiveKitMeeting from '@/components/LiveKitMeeting';
 import LiveChat from '@/components/LiveChat';
 
 interface Product {
@@ -37,6 +37,7 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
   const [celebrating, setCelebrating] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [confetti, setConfetti] = useState<{id: number, x: number, rotate: number, duration: number, delay: number}[]>([]);
+  const [showBranding, setShowBranding] = useState(true);
   
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -54,7 +55,7 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
   const addItem = useWardrobeStore((state) => state.addItem);
   const wardrobeCount = useWardrobeStore((state) => state.getTotalItems());
   
-  const { isShopperActive, jitsiRoomId, setShopperActive } = useLiveStore();
+  const { isShopperActive, livekitRoomId, setShopperActive } = useLiveStore();
 
   const [activities] = useState([
     { id: 1, text: `GUEST IN MILAN JUST VIEWED ${brandName.toUpperCase()}` },
@@ -150,7 +151,60 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
       {/* Layer 0: Premium Frame / Cinematic Border */}
       <div className="absolute inset-0 z-0 bg-linear-to-b from-accent/5 via-transparent to-accent/5 pointer-events-none" />
       
-      <div className="relative h-full w-full rounded-[40px] overflow-hidden border-2 border-white/20 shadow-[0_0_80px_rgba(0,0,0,0.9),inset_0_0_30px_rgba(255,255,255,0.05),0_0_20px_rgba(212,175,55,0.1)] bg-secondary">
+      <div className="relative group/video h-full w-full rounded-[40px] overflow-hidden border-2 border-white/20 shadow-[0_0_80px_rgba(0,0,0,0.9),inset_0_0_30px_rgba(255,255,255,0.05),0_0_20px_rgba(212,175,55,0.1)] bg-secondary">
+        {/* Cinematic Premium Branding Overlay */}
+        <AnimatePresence>
+          {showBranding && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20, x: -20 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              className="absolute top-28 left-6 z-30 flex flex-col items-start group/branding"
+            >
+               <div className="relative overflow-hidden bg-black/40 backdrop-blur-2xl rounded-2xl border border-white/20 p-2.5 shadow-2xl min-w-[170px] hover:border-action/40 transition-colors">
+                  {/* Subtle Background Glow */}
+                  <div className="absolute inset-0 bg-linear-to-tr from-action/5 to-transparent pointer-none" />
+                  
+                  <div className="relative z-10 flex items-center justify-between gap-3 mb-2">
+                     <div className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-action animate-pulse" />
+                        <span className="text-[7px] font-black uppercase tracking-[.2em] text-action">Verified Stream</span>
+                     </div>
+                     <button 
+                       onClick={() => setShowBranding(false)}
+                       className="p-0.5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-colors cursor-pointer"
+                     >
+                        <X size={12} />
+                     </button>
+                  </div>
+
+                  <div className="relative z-10 flex items-center gap-3">
+                     <div className="relative h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-action">
+                        <ShieldCheck size={16} />
+                        <motion.div 
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                          className="absolute inset-0 border border-action/20 border-dashed rounded-lg"
+                        />
+                     </div>
+                     <div className="flex flex-col">
+                        <Image src="/fashionboxe-text-logo.svg" alt="Fashionboxe" width={90} height={20} className="brightness-200" />
+                        <span className="text-[6px] font-bold text-white/40 uppercase tracking-[.3em] mt-0.5">Official Protocol</span>
+                     </div>
+                  </div>
+               </div>
+               
+               {/* Ambient HUD Accent */}
+               <motion.div 
+                 initial={{ width: 0 }}
+                 animate={{ width: '100%' }}
+                 transition={{ delay: 0.5, duration: 1 }}
+                 className="h-[2px] bg-linear-to-r from-transparent via-action/40 to-action mt-2 rounded-full"
+               />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Layer 1: The Optimized Stream/Video Layer */}
         {streamUrl && !streamUrl.includes('demo.owncast.online') ? (
           <iframe
@@ -197,7 +251,7 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
       </AnimatePresence>
 
       {/* Layer 2: Status Overlays (HUD) */}
-      <div className="absolute left-10 top-32 z-20 flex items-center gap-4">
+      <div className="absolute left-10 top-64 z-20 flex items-center gap-4">
         <div className="flex items-center gap-3 bg-action px-4 py-1.5 rounded-full shadow-2xl shadow-action/40 animate-pulse">
           <Radio className="h-3.5 w-3.5 text-background" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-background">Live Feed</span>
@@ -213,7 +267,7 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
       </div>
 
       {/* Phase 3: Real-time Activity Ticker */}
-      <div className="absolute left-10 top-44 z-30 w-80 overflow-hidden mask-fade-right">
+      <div className="absolute left-10 top-76 z-30 w-80 overflow-hidden mask-fade-right">
          <motion.div 
            animate={{ x: '-100%' }}
            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
@@ -525,9 +579,8 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Phase 2: HUD Concierge (Personal Shopper PiP) */}
       <AnimatePresence>
-        {isShopperActive && jitsiRoomId && (
+        {isShopperActive && livekitRoomId && (
           <motion.div
             drag
             dragMomentum={false}
@@ -549,9 +602,9 @@ export default function LivePlayer({ streamUrl, brandName, brandId, products, fa
              <div className="absolute top-0 inset-x-0 h-8 bg-linear-to-b from-black/40 to-transparent cursor-move" />
 
              <div className="h-full w-full pointer-events-auto">
-                <JitsiMeeting 
-                  roomName={jitsiRoomId}
-                  displayName="Fashionboxe Guest"
+                <LiveKitMeeting 
+                  roomName={livekitRoomId}
+                  participantName="Fashionboxe Guest"
                   onClose={() => setShopperActive(false)}
                 />
              </div>

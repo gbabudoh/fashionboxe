@@ -19,7 +19,7 @@ interface Brand {
   image: string;
 }
 
-const CATEGORIES = ['All', 'Apparel', 'Accessories', 'Timepieces', 'Footwear', 'Beauty'];
+const CATEGORIES = ['All', 'Apparel', 'Footwear', 'Jewellery', 'Beauty', 'Accessories'];
 
 export default function ShowroomsPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -77,7 +77,7 @@ export default function ShowroomsPage() {
             country: 'Italy',
             status: 'OPEN',
             isLive: false,
-            category: 'Timepieces',
+            category: 'Jewellery',
             image: "https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=800"
           },
           {
@@ -87,8 +87,28 @@ export default function ShowroomsPage() {
             country: 'United Kingdom',
             status: 'OPEN',
             isLive: false,
-            category: 'Accessories',
+            category: 'Footwear',
             image: "https://images.pexels.com/photos/322207/pexels-photo-322207.jpeg?auto=compress&cs=tinysrgb&w=800"
+          },
+          {
+            id: '4',
+            name: 'Elysian Aura',
+            slug: 'elysian-aura',
+            country: 'France',
+            status: 'OPEN',
+            isLive: false,
+            category: 'Beauty',
+            image: "https://images.pexels.com/photos/335257/pexels-photo-335257.jpeg?auto=compress&cs=tinysrgb&w=800"
+          },
+          {
+            id: '5',
+            name: 'Lumina Craft',
+            slug: 'lumina-craft',
+            country: 'Italy',
+            status: 'OPEN',
+            isLive: false,
+            category: 'Accessories',
+            image: "https://images.pexels.com/photos/267320/pexels-photo-267320.jpeg?auto=compress&cs=tinysrgb&w=800"
           }
         ];
 
@@ -159,7 +179,8 @@ export default function ShowroomsPage() {
         </div>
 
         {/* Filter HUD Overlay */}
-        <div className="relative z-20 flex flex-col md:flex-row items-center gap-6 mb-12 p-6 bg-white/5 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-2xl overflow-hidden">
+        <div className="relative z-20 flex flex-col md:flex-row items-center gap-6 mb-12 p-3 bg-white/5 backdrop-blur-2xl rounded-[40px] border border-white/10 shadow-2xl">
+          <div className="absolute inset-0 bg-linear-to-b from-white/5 to-transparent pointer-none rounded-[40px]" />
           
           {/* Expanding Search HUD */}
           <motion.div 
@@ -210,18 +231,29 @@ export default function ShowroomsPage() {
             )}
           </motion.div>
 
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide flex-1">
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0 scrollbar-hide flex-1 px-2">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`flex-shrink-0 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                className={`relative flex-shrink-0 px-4 py-2.5 rounded-[12px] text-[7px] font-black uppercase tracking-[0.35em] transition-all duration-500 cursor-pointer overflow-hidden group/btn ${
                   category === cat 
-                    ? 'bg-action text-background shadow-[0_0_30px_rgba(0,240,255,0.3)]' 
-                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
+                    ? 'text-action' 
+                    : 'text-white/30 hover:text-white'
                 }`}
               >
-                {cat}
+                <div className={`absolute inset-0 transition-opacity duration-500 ${category === cat ? 'opacity-100' : 'opacity-0'}`}>
+                   <div className="absolute inset-0 bg-action/10 backdrop-blur-md" />
+                   <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-action to-transparent shadow-[0_0_15px_rgba(0,240,255,0.8)]" />
+                </div>
+                
+                <span className="relative z-10 transition-transform duration-500 group-hover/btn:scale-110 block">
+                   {cat}
+                </span>
+                
+                {category !== cat && (
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                )}
               </button>
             ))}
           </div>
@@ -229,33 +261,12 @@ export default function ShowroomsPage() {
           <div className="h-full w-px bg-white/10 hidden lg:block" />
 
           <div className="flex items-center gap-3">
-             <CountrySelector 
-               value={selectedCountry}
-               onChange={setSelectedCountry}
-               variant="modal"
-               className="min-w-[180px]"
-             />
-          </div>
-
-          <div className="h-full w-px bg-white/10 hidden md:block" />
-
-          <div className="flex items-center gap-4 bg-black/20 rounded-2xl p-1 border border-white/5">
-             <div className="px-3">
-               <SortAsc size={16} className="text-white/20" />
-             </div>
-             {(['recommended', 'status', 'alphabetical', 'latest'] as const).map((id) => (
-               <button
-                 key={id}
-                 onClick={() => setSortBy(id)}
-                 className={`px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
-                   sortBy === id 
-                     ? 'bg-white/10 text-white shadow-lg' 
-                     : 'text-white/20 hover:text-white/40'
-                 }`}
-               >
-                 {id === 'recommended' ? 'Best' : id === 'status' ? 'Priority' : id === 'alphabetical' ? 'A-Z' : 'Latest'}
-               </button>
-             ))}
+              <CountrySelector 
+                value={selectedCountry}
+                onChange={setSelectedCountry}
+                variant="dropdown"
+                className="min-w-[140px]"
+              />
           </div>
 
           <div className="h-full w-px bg-white/10 hidden md:block" />

@@ -11,7 +11,7 @@ export async function updateBrandSettings(brandId: string, data: {
   isLive?: boolean;
   primaryColor?: string;
   accentColor?: string;
-  jitsiRoomId?: string;
+  livekitRoomId?: string;
   openingTime?: string;
   closingTime?: string;
   mattermostWebhookUrl?: string;

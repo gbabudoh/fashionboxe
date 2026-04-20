@@ -2,6 +2,7 @@ import React from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ConcessionSettingsForm from '@/components/dashboard/ConcessionSettingsForm';
 import { prisma } from '@/lib/prisma';
+import { Brand } from '@prisma/client';
 
 export default async function ConcessionSettingsPage() {
   // In a real app, we would get the logged-in user's brandId
@@ -10,17 +11,17 @@ export default async function ConcessionSettingsPage() {
 
   if (!brand) {
     // Seed a dummy brand if none exists for demo purposes
-    brand = await prisma.brand.create({
+    brand = (await prisma.brand.create({
       data: {
         name: "Velvet & Vine",
         slug: "velvet-vine",
         description: "Luxury apparel for the modern runway.",
         country: "France",
         streamUrl: "https://demo.owncast.online/embed/video",
-        jitsiRoomId: "fashionboxe-velvet-vine",
+        livekitRoomId: "fashionboxe-velvet-vine", // Updated LiveKit Room ID
         isLive: false,
       }
-    });
+    })) as Brand;
   }
 
   return (

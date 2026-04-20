@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -16,7 +16,7 @@ async function main() {
       status: 'OPEN',
       primaryColor: '#0d0d0d',
       accentColor: '#d4af37',
-      jitsiRoomId: 'lux-noir-private-showroom',
+      livekitRoomId: 'lux-noir-private-showroom',
     },
   });
 
